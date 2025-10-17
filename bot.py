@@ -18,7 +18,7 @@ main_keyboard = {
     "resize_keyboard": True
 }
 
-def send_message(chat_id, text, keyboard=None):
+def send_message(chat_id, text, keyboard=None, parse_mode=None):
     """Отправка сообщения"""
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     data = {
@@ -27,6 +27,8 @@ def send_message(chat_id, text, keyboard=None):
     }
     if keyboard:
         data['reply_markup'] = json.dumps(keyboard)
+    if parse_mode:
+        data['parse_mode'] = parse_mode
     
     try:
         response = requests.post(url, json=data, timeout=10)
