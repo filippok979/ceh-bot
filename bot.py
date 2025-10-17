@@ -30,6 +30,14 @@ calculation_keyboard = {
     "resize_keyboard": True
 }
 
+# Клавиатура для вопроса мастеру
+question_keyboard = {
+    "keyboard": [
+        [{"text": "🔙 Назад"}]
+    ],
+    "resize_keyboard": True
+}
+
 # Словарь для отслеживания состояния пользователей
 user_states = {}
 
@@ -44,40 +52,6 @@ def send_message(chat_id, text, keyboard=None, parse_mode=None):
         data['reply_markup'] = json.dumps(keyboard)
     if parse_mode:
         data['parse_mode'] = parse_mode
-    
-    try:
-        response = requests.post(url, json=data, timeout=10)
-        return response
-    except:
-        return None
-
-def forward_to_admin(original_message, menu_type):
-    """Пересылка сообщения в админ чат"""
-    user = original_message['from']
-    user_name = user.get('first_name', 'Пользователь')
-    username = f"@{user.get('username', 'нет')}" if user.get('username') else "нет"
-    user_id = user.get('id', 'неизвестно')
-    current_time = datetime.now().strftime("%H:%M %d.%m.%Y")
-    
-    # Информационное сообщение
-    info_message = (
-        f"📞 🚨 {menu_type} 🚨\n"
-        f"👤 Пользователь: {user_name}\n"
-        f"📱 Username: {username}\n"
-        f"🆔 ID: {user_id}\n"
-        f"⏰ Время: {current_time}"
-    )
-    
-    # Сначала отправляем информационное сообщение
-    send_message(ADMIN_CHAT_ID, info_message)
-    
-    # Затем пересылаем оригинальное сообщение
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/forwardMessage"
-    data = {
-        'chat_id': ADMIN_CHAT_ID,
-        'from_chat_id': original_message['chat']['id'],
-        'message_id': original_message['message_id']
-    }
     
     try:
         response = requests.post(url, json=data, timeout=10)
@@ -230,21 +204,22 @@ def webhook():
                 )
         
         # Обработка сообщений в состояниях ожидания
-        elif current_state in ['awaiting_design_project', 'awaiting_idea', 'awaiting_business']:
+        elif current_state in ['awaiting_design_project', 'awaiting_idea', 'awaiting_business', 'awaiting_question']:
             menu_types = {
                 'awaiting_design_project': 'Дизайн-Проект',
                 'awaiting_idea': 'Реализация идеи', 
-                'awaiting_business': 'Мебель для бизнеса'
+                'awaiting_business': 'Мебель для бизнеса',
+                'awaiting_question': 'Вопрос мастеру'
             }
             
-            menu_type = menu_types.get(current_state, 'Расчет проекта')
+            menu_type = menu_types.get(current_state, 'Сообщение')
             
             # Копируем сообщение в админ чат
             copy_to_admin(message, menu_type)
             
             # Подтверждаем пользователю
             send_message(chat_id,
-                "✅ Ваша заявка принята! Мы свяжемся с вами в ближайшее время для уточнения деталей.",
+                "✅ Ваше сообщение принято! Мастер свяжется с вами в ближайшее время.",
                 main_keyboard
             )
             
@@ -277,12 +252,19 @@ def webhook():
             )
         
         elif text == '💬 Вопрос мастеру':
-            user_states[chat_id] = None
+            user_states[chat_id] = 'awaiting_question'
             send_message(chat_id,
-                "👨‍🔧 Контакты: 8-903-656-34-80 @filippovceh",
-                main_keyboard
+                "🎯 <b>Бесплатная консультация мастера</b>\n\n"
+                "💬 Здесь вы можете получить бесплатную консультацию по любому вопросу, связанному с вашим будущим изделием:\n\n"
+                "• 🤔 Не уверены в выборе материала или фурнитуры?\n"
+                "• 📐 Есть сложности с планировкой или нестандартный размер?\n"
+                "• 💡 Хотите услышать профессиональное мнение о вашем проекте?\n"
+                "• 🧼 Нужен совет по уходу за мебелью?\n\n"
+                "🛠️ Я помогу вам избежать ошибок и создать идеальную мебель для вашего дома. "
+                "Просто напишите свой вопрос, я передам его мастеру и он с вами свяжется.",
+                question_keyboard,
+                parse_mode='HTML'
             )
-            send_message(ADMIN_CHAT_ID, f"🚨 {user_name} запросил контакт!")
         
         elif text and not current_state:
             # Игнорируем обычные текстовые сообщения (кроме состояний ожидания)
