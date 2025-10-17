@@ -230,23 +230,36 @@ def webhook():
             user_states[chat_id] = None
             send_message(chat_id,
                 "🌳 <b>Материалы и фурнитура</b>\n\n"
+                "🚪 <b>Фасады в эмали и пленке ПВХ</b>\n\n"
                 "📌 <b>ЛДСП:</b>\n"
                 "🟫 <b>Lamarty</b>\n"
-                "https://www.lamarty.ru/lamarty/decors/?ysclid=mgugeh3vew737907588\n\n"
+                "https://www.lamarty.ru/lamarty/\n\n"
                 "🟫 <b>EGGER</b>\n"
-                "https://basis-vrn.ru/ldsp-egger/?yclid=18235183174227066879\n\n"
+                "https://egger-russia.ru/\n\n"
                 "🔩 <b>Фурнитура:</b>\n"
                 "⚙️ <b>Blum</b>\n"
                 "https://www.blum.com/md/ru/\n\n"
                 "⚙️ <b>Boyard</b>\n"
                 "https://www.boyard.biz/\n\n"
                 "⚙️ <b>Hafele</b>\n"
-                "https://hafele-shop.ru/?ysclid=mgugqk71pt831069121\n\n"
+                "https://hafele-shop.ru/\n\n"
                 "⚙️ <b>Hettich</b>\n"
-                "https://hettich.ru/?ysclid=mgugrnesxl814262693\n\n"
+                "https://hettich.ru/\n\n"
                 "📏 <b>Кромочный материал:</b>\n"
                 "🎨 <b>Rehau</b>\n"
-                "https://www.rehau.com/in-en/interiors-edges-edgebands",
+                "https://www.rehau.com/in-en\n\n"
+                "✨ <b>Смарт-материал:</b>\n"
+                "🌟 <b>Fenix-hpl</b>\n"
+                "https://fenix-hpl.ru/\n\n"
+                "🛡️ <b>HPL-Compact</b>\n"
+                "https://arcoplastica.ru/\n\n"
+                "🎨 <b>Декоративные панели:</b>\n"
+                "🟨 <b>Kastamonu</b>\n"
+                "https://www.kastamonuentegre.com/ru_ru/tovary/dekorativnye-paneli\n\n"
+                "🟫 <b>Woodstock</b>\n"
+                "https://www.woodstock.su/\n\n"
+                "⬜ <b>Столешницы</b>\n"
+                "https://amk-troya.ru/product-category/stoleshniczy/",
                 main_keyboard,
                 parse_mode='HTML'
             )
