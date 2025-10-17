@@ -51,13 +51,60 @@ def send_message(chat_id, text, keyboard=None, parse_mode=None):
     except:
         return None
 
-def send_to_admin(user, menu_type, message_text=None, file_info=None):
+def send_photo(chat_id, photo_url, caption=None):
+    """Отправка фото"""
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
+    data = {
+        'chat_id': chat_id,
+        'photo': photo_url
+    }
+    if caption:
+        data['caption'] = caption
+    
+    try:
+        response = requests.post(url, json=data, timeout=10)
+        return response
+    except:
+        return None
+
+def send_document(chat_id, document_url, caption=None):
+    """Отправка документа"""
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
+    data = {
+        'chat_id': chat_id,
+        'document': document_url
+    }
+    if caption:
+        data['caption'] = caption
+    
+    try:
+        response = requests.post(url, json=data, timeout=10)
+        return response
+    except:
+        return None
+
+def get_file_url(file_id):
+    """Получение URL файла"""
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/getFile"
+    data = {'file_id': file_id}
+    
+    try:
+        response = requests.post(url, json=data, timeout=10)
+        if response.status_code == 200:
+            file_path = response.json()['result']['file_path']
+            return f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
+    except:
+        pass
+    return None
+
+def send_to_admin(user, menu_type, message_text=None, file_url=None, file_type=None, file_name=None):
     """Отправка сообщения в админ чат"""
     user_name = user.get('first_name', 'Пользователь')
     username = f"@{user.get('username', 'нет')}" if user.get('username') else "нет"
     user_id = user.get('id', 'неизвестно')
     current_time = datetime.now().strftime("%H:%M %d.%m.%Y")
     
+    # Основное информационное сообщение
     message = (
         f"📞 🚨 {menu_type} 🚨\n"
         f"👤 Пользователь: {user_name}\n"
@@ -67,14 +114,18 @@ def send_to_admin(user, menu_type, message_text=None, file_info=None):
     )
     
     if message_text:
-        if len(message_text) > 1000:
-            message_text = message_text[:1000] + "..."
         message += f"\n📝 Сообщение:\n{message_text}"
     
-    if file_info:
-        message += f"\n📎 Прикреплен файл/фото"
-    
+    # Сначала отправляем информационное сообщение
     send_message(ADMIN_CHAT_ID, message)
+    
+    # Затем отправляем файл/фото если есть
+    if file_url and file_type:
+        if file_type == 'photo':
+            send_photo(ADMIN_CHAT_ID, file_url, f"📎 Фото от {user_name}")
+        elif file_type == 'document':
+            file_caption = f"📎 Документ: {file_name}" if file_name else f"📎 Файл от {user_name}"
+            send_document(ADMIN_CHAT_ID, file_url, file_caption)
 
 @app.route('/')
 def home():
@@ -170,15 +221,26 @@ def webhook():
             
             menu_type = menu_types.get(current_state, 'Расчет проекта')
             
-            # Проверяем, есть ли файлы или фото
-            file_info = None
-            if 'document' in message:
-                file_info = f"Документ: {message['document'].get('file_name', 'файл')}"
-            elif 'photo' in message:
-                file_info = "Фото"
+            file_url = None
+            file_type = None
+            file_name = None
             
-            # Отправляем в админ чат
-            send_to_admin(user, menu_type, text, file_info)
+            # Обработка фото
+            if 'photo' in message:
+                # Берем последнее (самое качественное) фото
+                photo = message['photo'][-1]
+                file_url = get_file_url(photo['file_id'])
+                file_type = 'photo'
+            
+            # Обработка документов
+            elif 'document' in message:
+                document = message['document']
+                file_url = get_file_url(document['file_id'])
+                file_type = 'document'
+                file_name = document.get('file_name', 'файл')
+            
+            # Отправляем в админ чат (сообщение + файлы)
+            send_to_admin(user, menu_type, text, file_url, file_type, file_name)
             
             # Подтверждаем пользователю
             send_message(chat_id,
