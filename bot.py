@@ -251,14 +251,17 @@ def webhook():
                 "✨ <b>Смарт-материал:</b>\n"
                 "🌟 <b>Fenix-hpl</b>\n"
                 "https://fenix-hpl.ru/\n\n"
-                "🛡️ <b>HPL-Compact</b>\n"
-                "https://arcoplastica.ru/\n\n"
                 "🎨 <b>Декоративные панели:</b>\n"
                 "🟨 <b>Kastamonu</b>\n"
                 "https://www.kastamonuentegre.com/ru_ru/tovary/dekorativnye-paneli\n\n"
                 "🟫 <b>Woodstock</b>\n"
                 "https://www.woodstock.su/\n\n"
-                "⬜ <b>Столешницы</b>\n"
+                "🛡️ <b>Столешницы</b>\n\n"
+                "🛡️ <b>HPL-Compact</b>\n"
+                "https://arcoplastica.ru/\n\n"
+                "💎 <b>Акриловый и натуральный камень</b>\n"
+                "https://akvrn.ru/?ysclid=mgupb00w9b365927187\n\n"
+                "⬜ <b>ДСП</b>\n"
                 "https://amk-troya.ru/product-category/stoleshniczy/",
                 main_keyboard,
                 parse_mode='HTML'
