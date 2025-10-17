@@ -75,8 +75,26 @@ def webhook():
         
         elif text == '🪵 Материалы и фурнитура':
             send_message(chat_id,
-                "🏷️ ЛДСП Lamarty, Egger • Кромка Rehau • Фурнитура Blum",
-                main_keyboard
+                "🌳 <b>Материалы и фурнитура</b>\n\n"
+                "📌 <b>ЛДСП:</b>\n"
+                "🟫 <b>Lamarty</b>\n"
+                "https://www.lamarty.ru/lamarty/decors/?ysclid=mgugeh3vew737907588\n\n"
+                "🟫 <b>EGGER</b>\n"
+                "https://basis-vrn.ru/ldsp-egger/?yclid=18235183174227066879\n\n"
+                "🔩 <b>Фурнитура:</b>\n"
+                "⚙️ <b>Blum</b>\n"
+                "https://www.blum.com/md/ru/\n\n"
+                "⚙️ <b>Boyard</b>\n"
+                "https://www.boyard.biz/\n\n"
+                "⚙️ <b>Hafele</b>\n"
+                "https://hafele-shop.ru/?ysclid=mgugqk71pt831069121\n\n"
+                "⚙️ <b>Hettich</b>\n"
+                "https://hettich.ru/?ysclid=mgugrnesxl814262693\n\n"
+                "📏 <b>Кромочный материал:</b>\n"
+                "🎨 <b>Rehau</b>\n"
+                "https://www.rehau.com/in-en/interiors-edges-edgebands",
+                main_keyboard,
+                parse_mode='HTML'
             )
         
         elif text == '💬 Вопрос мастеру':
