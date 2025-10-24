@@ -67,16 +67,6 @@ def copy_to_admin(original_message, menu_type):
     user_id = user.get('id', 'неизвестно')
     current_time = datetime.now().strftime("%H:%M %d.%m.%Y")
     
-    # Создаем клавиатуру с кнопками для админа
-    admin_keyboard = {
-        "inline_keyboard": [
-            [
-                {"text": "📋 Скопировать ID", "callback_data": f"copy_{user_id}"},
-                {"text": "💌 Ответить", "callback_data": f"reply_{user_id}"}
-            ]
-        ]
-    }
-    
     # Информационное сообщение
     info_message = (
         f"📞 🚨 {menu_type} 🚨\n"
@@ -86,8 +76,8 @@ def copy_to_admin(original_message, menu_type):
         f"⏰ Время: {current_time}"
     )
     
-    # Сначала отправляем информационное сообщение с кнопками
-    send_message(ADMIN_CHAT_ID, info_message, admin_keyboard)
+    # Сначала отправляем информационное сообщение
+    send_message(ADMIN_CHAT_ID, info_message)
     
     # Затем копируем контент оригинального сообщения
     text = original_message.get('text', '')
@@ -129,60 +119,6 @@ def copy_to_admin(original_message, menu_type):
         except:
             pass
 
-def handle_callback_query(callback_query):
-    """Обработка нажатий на inline-кнопки"""
-    data = callback_query['data']
-    user_id = callback_query['from']['id']
-    message_id = callback_query['message']['message_id']
-    
-    if data.startswith('copy_'):
-        target_user_id = data.replace('copy_', '')
-        # Отправляем админу ID для копирования
-        send_message(user_id, f"🆔 ID пользователя: `{target_user_id}`\n\nСкопируйте этот ID для ответа.", parse_mode='Markdown')
-        
-    elif data.startswith('reply_'):
-        target_user_id = data.replace('reply_', '')
-        # Инструкция для ответа пользователю
-        send_message(user_id, 
-            f"✉️ Ответ пользователю ID: `{target_user_id}`\n\n"
-            f"Чтобы отправить сообщение, используйте команду:\n"
-            f"`/send {target_user_id} Ваш текст сообщения`\n\n"
-            f"Например:\n"
-            f"`/send {target_user_id} Здравствуйте! Получили ваше сообщение.`",
-            parse_mode='Markdown'
-        )
-    
-    # Подтверждаем обработку callback (убирает "часики")
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/answerCallbackQuery"
-    requests.post(url, json={'callback_query_id': callback_query['id']})
-
-def handle_admin_command(message):
-    """Обработка команд админа"""
-    text = message.get('text', '')
-    admin_id = message['from']['id']
-    
-    if text.startswith('/send '):
-        parts = text.split(' ', 2)
-        if len(parts) >= 3:
-            target_user_id = parts[1]
-            message_text = parts[2]
-            
-            try:
-                # Пытаемся отправить сообщение пользователю
-                send_message(target_user_id, 
-                    f"💬 Сообщение от мастера:\n\n{message_text}\n\n"
-                    f"✉️ Чтобы ответить, просто напишите в этот чат."
-                )
-                send_message(admin_id, f"✅ Сообщение отправлено пользователю {target_user_id}")
-            except:
-                send_message(admin_id, f"❌ Не удалось отправить сообщение пользователю {target_user_id}")
-        else:
-            send_message(admin_id, "❌ Используйте: /send USER_ID ТЕКСТ_СООБЩЕНИЯ")
-        
-        return True
-    
-    return False
-
 @app.route('/')
 def home():
     return "✅ Бот ЦЕХ работает! Используйте Telegram."
@@ -192,11 +128,6 @@ def webhook():
     """Обработка вебхуков от Telegram"""
     update = request.get_json()
     
-    # Обработка callback_query (нажатий на кнопки)
-    if 'callback_query' in update:
-        handle_callback_query(update['callback_query'])
-        return 'OK'
-    
     if 'message' in update:
         message = update['message']
         chat_id = message['chat']['id']
@@ -204,11 +135,6 @@ def webhook():
         user = message['from']
         
         user_name = user.get('first_name', 'Пользователь')
-        
-        # Проверяем, является ли отправитель админом и обрабатываем команды
-        if str(chat_id) == ADMIN_CHAT_ID.replace('-', ''):
-            if handle_admin_command(message):
-                return 'OK'
         
         # Проверяем, находится ли пользователь в состоянии ожидания ввода
         current_state = user_states.get(chat_id)
@@ -220,23 +146,7 @@ def webhook():
                 "Выберите опцию ниже:",
                 main_keyboard
             )
-            # Обновляем уведомление для админа с кнопками
-            user_id = user.get('id', 'неизвестно')
-            username = f"@{user.get('username', 'нет')}" if user.get('username') else "нет"
-            admin_keyboard = {
-                "inline_keyboard": [
-                    [
-                        {"text": "📋 Скопировать ID", "callback_data": f"copy_{user_id}"},
-                        {"text": "💌 Ответить", "callback_data": f"reply_{user_id}"}
-                    ]
-                ]
-            }
-            send_message(ADMIN_CHAT_ID, 
-                f"🆕 Новый пользователь: {user_name}\n"
-                f"📱 Username: {username}\n"
-                f"🆔 ID: {user_id}", 
-                admin_keyboard
-            )
+            send_message(ADMIN_CHAT_ID, f"🆕 Новый пользователь: {user_name}")
         
         elif text == '🔙 Назад':
             user_states[chat_id] = None
